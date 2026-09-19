@@ -1,6 +1,5 @@
+flask
 librosa
 scikit-learn
-streamlit
 joblib
 numpy
-flask

@@ -1,0 +1,13 @@
+name: deepfake-voice-detector
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - flask
+      - librosa
+      - scikit-learn
+      - joblib
+      - numpy
