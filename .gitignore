@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+data/
+temp_audio.flac
+temp_audio.*
+*.wav
+*.flac
+*.mp3
+*.m4a
+*.ogg
+*.tmp
+*.pkl

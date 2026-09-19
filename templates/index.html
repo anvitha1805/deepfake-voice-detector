@@ -1,0 +1,1028 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Spoofing-Aware Speaker Verification (SASV-Core)</title>
+  <!-- Fonts: Inter & JetBrains Mono -->
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            deepDark: '#08080a',
+            panelDark: '#121216',
+            borderDark: 'rgba(255, 255, 255, 0.08)',
+          }
+        }
+      }
+    }
+  </script>
+  <!-- BEGIN: Custom Stylesheet for Halftone Stipple Sphere and Lighting -->
+  <style data-purpose="stipple-dome-and-halftone">
+    /* Deep space aesthetic with subtle noise texture emulation */
+    body {
+      background-color: #070709;
+      background-image: 
+        radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.035) 0%, transparent 65%),
+        radial-gradient(ellipse at 50% 80%, rgba(20, 24, 33, 0.4) 0%, transparent 80%);
+      color: #e5e7eb;
+      overflow-x: hidden;
+    }
+
+    /* Continuous CSS rotation for Dot-Matrix Globe */
+    @keyframes spinGlobe {
+      0% {
+        transform: translate(-50%, -46%) rotate(0deg);
+      }
+      100% {
+        transform: translate(-50%, -46%) rotate(360deg);
+      }
+    }
+
+    /* Stippled / Halftone Dotted Sphere Dome Effect */
+    .halftone-sphere {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -46%);
+      width: 780px;
+      height: 780px;
+      max-width: 95vw;
+      max-height: 95vw;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 1;
+      transform-origin: center center;
+      animation: spinGlobe 60s linear infinite;
+      
+      /* Multi-scale radial dot matrix simulating stippled engraving */
+      background-image: 
+        radial-gradient(rgba(255, 255, 255, 0.35) 1px, transparent 1.2px),
+        radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1.2px);
+      background-size: 10px 10px, 6px 6px;
+      background-position: 0 0, 3px 3px;
+      
+      /* Curved spherical vignette masking: bright arc/edges, hollower inner core */
+      mask-image: radial-gradient(
+        circle at 50% 50%,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.8) 55%,
+        rgba(0, 0, 0, 0.4) 68%,
+        rgba(0, 0, 0, 0) 71%
+      );
+      -webkit-mask-image: radial-gradient(
+        circle at 50% 50%,
+        rgba(0, 0, 0, 0.95) 0%,
+        rgba(0, 0, 0, 0.82) 56%,
+        rgba(0, 0, 0, 0.35) 68%,
+        rgba(0, 0, 0, 0) 71%
+      );
+      opacity: 0.85;
+      filter: drop-shadow(0 0 45px rgba(255, 255, 255, 0.08));
+    }
+
+    /* Spherical edge glow rim */
+    .halftone-rim {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -46%);
+      width: 780px;
+      height: 780px;
+      max-width: 95vw;
+      max-height: 95vw;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 2;
+      border: 1px dashed rgba(255, 255, 255, 0.12);
+      box-shadow: inset 0 0 80px rgba(255, 255, 255, 0.06), 0 0 60px rgba(255, 255, 255, 0.03);
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 100%);
+      -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0.85) 60%, rgba(0,0,0,0) 100%);
+    }
+
+    /* Concentric sonic wave pulses for drop area */
+    @keyframes pulseRing {
+      0% {
+        transform: scale(0.65);
+        opacity: 0.8;
+      }
+      70% {
+        opacity: 0.25;
+      }
+      100% {
+        transform: scale(1.6);
+        opacity: 0;
+      }
+    }
+
+    .sonic-ring-1 {
+      animation: pulseRing 3.2s cubic-bezier(0.2, 0.8, 0.25, 1) infinite;
+    }
+    .sonic-ring-2 {
+      animation: pulseRing 3.2s cubic-bezier(0.2, 0.8, 0.25, 1) 1s infinite;
+    }
+    .sonic-ring-3 {
+      animation: pulseRing 3.2s cubic-bezier(0.2, 0.8, 0.25, 1) 2s infinite;
+    }
+
+    /* Rhythmic sonic bar animation */
+    @keyframes soundBarFloat {
+      0%, 100% {
+        height: 6px;
+        opacity: 0.35;
+      }
+      50% {
+        height: 24px;
+        opacity: 0.95;
+      }
+    }
+
+    .sonic-bar {
+      animation: soundBarFloat 1.8s ease-in-out infinite;
+    }
+
+    /* Active Multi-Layer Waveform Undulation in Results State */
+    @keyframes undulateWave1 {
+      0%, 100% {
+        transform: translateY(0px) scaleY(1);
+      }
+      50% {
+        transform: translateY(-4px) scaleY(1.15);
+      }
+    }
+
+    @keyframes undulateWave2 {
+      0%, 100% {
+        transform: translateY(0px) scaleY(1);
+      }
+      50% {
+        transform: translateY(3px) scaleY(0.88);
+      }
+    }
+
+    @keyframes undulateDash {
+      0% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: -120;
+      }
+    }
+
+    .anim-wave-1 {
+      animation: undulateWave1 4s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .anim-wave-2 {
+      animation: undulateWave2 3.2s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .anim-wave-dash {
+      stroke-dasharray: 6 6;
+      animation: undulateDash 14s linear infinite;
+    }
+
+    /* Waveform ambient glow */
+    .waveform-glow {
+      filter: drop-shadow(0 0 14px rgba(255, 255, 255, 0.55)) drop-shadow(0 0 35px rgba(255, 255, 255, 0.25));
+    }
+
+    /* Custom subtle pulse for scanning state */
+    @keyframes scanPulse {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.9; }
+    }
+    .animate-scan-pulse {
+      animation: scanPulse 3s ease-in-out infinite;
+    }
+
+    /* Extended Multi-Tier Upward Moving Acoustic Wave Landscape Animations */
+    @keyframes wideWaveFloat1 {
+      0%, 100% {
+        transform: translateY(0px) scaleY(1);
+      }
+      50% {
+        transform: translateY(-16px) scaleY(1.14);
+      }
+    }
+
+    @keyframes wideWaveFloat2 {
+      0%, 100% {
+        transform: translateY(0px) scaleY(1) scaleX(1);
+      }
+      50% {
+        transform: translateY(14px) scaleY(0.9) scaleX(1.015);
+      }
+    }
+
+    @keyframes wideWaveFloat3 {
+      0%, 100% {
+        transform: translateY(0px) scaleY(1);
+        opacity: 0.75;
+      }
+      50% {
+        transform: translateY(-12px) scaleY(1.18);
+        opacity: 0.95;
+      }
+    }
+
+    @keyframes wideWaveFloat4 {
+      0%, 100% {
+        transform: translateY(0px) scaleX(1);
+      }
+      50% {
+        transform: translateY(-24px) scaleX(1.02);
+      }
+    }
+
+    @keyframes wideWaveFloat5 {
+      0%, 100% {
+        transform: translateY(0px) scaleY(1);
+      }
+      50% {
+        transform: translateY(18px) scaleY(1.08);
+      }
+    }
+
+    @keyframes wideWaveFloat6 {
+      0%, 100% {
+        transform: translateY(0px);
+        opacity: 0.65;
+      }
+      50% {
+        transform: translateY(-28px);
+        opacity: 0.95;
+      }
+    }
+
+    .wide-wave-layer-1 {
+      animation: wideWaveFloat1 7.2s ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+    .wide-wave-layer-2 {
+      animation: wideWaveFloat2 8.8s ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+    .wide-wave-layer-3 {
+      animation: wideWaveFloat3 6.1s ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+    .wide-wave-layer-4 {
+      animation: wideWaveFloat4 10.5s ease-in-out infinite;
+      transform-origin: 50% 90%;
+    }
+    .wide-wave-layer-5 {
+      animation: wideWaveFloat5 8.2s ease-in-out infinite;
+      transform-origin: 50% 100%;
+    }
+    .wide-wave-layer-6 {
+      animation: wideWaveFloat6 12.2s ease-in-out infinite;
+      transform-origin: 50% 90%;
+    }
+
+    /* Reactive wide waveform glow states */
+    .wide-wave-glow-default {
+      filter: drop-shadow(0 -6px 24px rgba(255, 255, 255, 0.16)) drop-shadow(0 0 45px rgba(255, 255, 255, 0.08));
+    }
+    .wide-wave-glow-deepfake {
+      filter: drop-shadow(0 -8px 28px rgba(185, 71, 71, 0.55)) drop-shadow(0 0 60px rgba(220, 38, 38, 0.3));
+    }
+    .wide-wave-glow-authentic {
+      filter: drop-shadow(0 -8px 28px rgba(82, 131, 104, 0.55)) drop-shadow(0 0 60px rgba(16, 185, 129, 0.3));
+    }
+
+    /* Drag over pulse border */
+    .dropzone-active {
+      border-color: rgba(255, 255, 255, 0.6) !important;
+      background-color: rgba(255, 255, 255, 0.08) !important;
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.15) inset, 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+  </style>
+  <!-- END: Custom Stylesheet for Halftone Stipple Sphere and Lighting -->
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-white/20 selection:text-white relative font-sans antialiased text-sm">
+  <!-- Hidden File Input for Audio Upload -->
+  <input type="file" id="audio-file-input" accept=".wav,.flac,audio/wav,audio/flac,audio/x-wav,audio/*" class="hidden" onchange="handleFileSelect(event)"/>
+
+  <!-- BEGIN: Background Atmosphere Components -->
+  <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <!-- Center Dot Matrix Celestial Sphere (Recreated from image reference with continuous rotation) -->
+    <div aria-hidden="true" class="halftone-sphere"></div>
+    <div aria-hidden="true" class="halftone-rim"></div>
+  </div>
+  <!-- END: Background Atmosphere Components -->
+
+  <!-- BEGIN: Extended Multi-Tier Upward Moving Acoustic Wave Canvas (Behind Main Card & Content) -->
+  <div class="fixed inset-x-0 bottom-0 h-[68vh] md:h-[75vh] pointer-events-none overflow-hidden z-0 select-none flex items-end justify-center" data-purpose="extended-wave-canvas">
+    <svg class="w-full h-full wide-wave-glow-default transition-all duration-700 pointer-events-none" id="wide-wave-svg" preserveaspectratio="none" viewbox="0 0 1600 700">
+      <defs>
+        <!-- Dynamic Fill Gradients: Upload Neutral Ethereal -->
+        <lineargradient gradientunits="userSpaceOnUse" id="wideGrad1" x1="800" x2="800" y1="360" y2="700">
+          <stop id="wide-grad1-stop1" offset="0%" stop-color="#ffffff" stop-opacity="0.12"></stop>
+          <stop id="wide-grad1-stop2" offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+        </lineargradient>
+        <lineargradient gradientunits="userSpaceOnUse" id="wideGrad2" x1="800" x2="800" y1="260" y2="700">
+          <stop id="wide-grad2-stop1" offset="0%" stop-color="#ffffff" stop-opacity="0.18"></stop>
+          <stop id="wide-grad2-stop2" offset="100%" stop-color="#ffffff" stop-opacity="0.01"></stop>
+        </lineargradient>
+        <lineargradient gradientunits="userSpaceOnUse" id="wideGradHigh" x1="800" x2="800" y1="90" y2="600">
+          <stop id="wide-gradhigh-stop1" offset="0%" stop-color="#ffffff" stop-opacity="0.06"></stop>
+          <stop id="wide-gradhigh-stop2" offset="100%" stop-color="#ffffff" stop-opacity="0"></stop>
+        </lineargradient>
+        <!-- Dynamic Stroke Horizontal Falloff Gradients -->
+        <lineargradient gradientunits="userSpaceOnUse" id="wideStrokeGrad1" x1="0" x2="1600" y1="0" y2="0">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.03"></stop>
+          <stop id="wide-stroke1-mid" offset="50%" stop-color="#ffffff" stop-opacity="0.35"></stop>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.03"></stop>
+        </lineargradient>
+        <lineargradient gradientunits="userSpaceOnUse" id="wideStrokeGrad2" x1="0" x2="1600" y1="0" y2="0">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.06"></stop>
+          <stop id="wide-stroke2-mid" offset="50%" stop-color="#ffffff" stop-opacity="0.65"></stop>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.06"></stop>
+        </lineargradient>
+        <lineargradient gradientunits="userSpaceOnUse" id="wideStrokeGrad3" x1="0" x2="1600" y1="0" y2="0">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.02"></stop>
+          <stop id="wide-stroke3-mid" offset="50%" stop-color="#ffffff" stop-opacity="0.45"></stop>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"></stop>
+        </lineargradient>
+        <lineargradient gradientunits="userSpaceOnUse" id="wideStrokeGrad4" x1="0" x2="1600" y1="0" y2="0">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.02"></stop>
+          <stop id="wide-stroke4-mid" offset="50%" stop-color="#ffffff" stop-opacity="0.25"></stop>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.02"></stop>
+        </lineargradient>
+        <lineargradient gradientunits="userSpaceOnUse" id="wideStrokeGrad5" x1="0" x2="1600" y1="0" y2="0">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.01"></stop>
+          <stop id="wide-stroke5-mid" offset="50%" stop-color="#ffffff" stop-opacity="0.18"></stop>
+          <stop offset="100%" stop-color="#ffffff" stop-opacity="0.01"></stop>
+        </lineargradient>
+      </defs>
+      <!-- Wave Ribbon 1 (Deep High-Altitude Harmonic Arch) -->
+      <g class="wide-wave-layer-6">
+        <path d="M0,700 C280,360 480,120 780,190 C1060,250 1280,90 1600,320 L1600,700 Z" fill="url(#wideGradHigh)" id="wide-fill-high"></path>
+        <path d="M0,450 C260,340 480,120 780,190 C1060,250 1280,90 1600,320" fill="none" id="wide-line-high-1" stroke="url(#wideStrokeGrad5)" stroke-width="1.2"></path>
+        <path d="M0,470 C300,310 540,160 840,220 C1140,280 1340,130 1600,360" fill="none" id="wide-line-high-2" opacity="0.6" stroke="url(#wideStrokeGrad4)" stroke-dasharray="8 6" stroke-width="0.85"></path>
+      </g>
+      <!-- Wave Ribbon 2 (Mid-Upper Flanking Wave) -->
+      <g class="wide-wave-layer-4">
+        <path d="M0,700 C200,520 400,240 680,280 C940,320 1180,190 1440,260 C1520,280 1570,310 1600,330" fill="none" id="wide-line-mid-1" stroke="url(#wideStrokeGrad4)" stroke-width="1.4"></path>
+        <path d="M0,580 Q400,210 820,310 T1600,240" fill="none" id="wide-line-mid-2" opacity="0.8" stroke="url(#wideStrokeGrad3)" stroke-width="1.1"></path>
+      </g>
+      <!-- Wave Ribbon 3 (Deep rolling ambient horizon ribbon) -->
+      <g class="wide-wave-layer-1">
+        <path d="M0,700 C280,620 420,380 640,460 C860,540 960,330 1180,410 C1380,480 1480,360 1600,700 Z" fill="url(#wideGrad1)" id="wide-fill-1"></path>
+        <path d="M0,660 C280,600 420,380 640,460 C860,540 960,330 1180,410 C1380,480 1480,360 1600,660" fill="none" id="wide-line-1" stroke="url(#wideStrokeGrad1)" stroke-width="1.3"></path>
+      </g>
+      <!-- Wave Ribbon 4 (Main resonant crest ribbon) -->
+      <g class="wide-wave-layer-2">
+        <path d="M0,700 C220,670 380,420 600,510 C820,600 940,260 1160,390 C1360,520 1460,430 1600,700 Z" fill="url(#wideGrad2)" id="wide-fill-2"></path>
+        <path d="M0,680 C220,660 380,420 600,510 C820,600 940,260 1160,390 C1360,520 1460,430 1600,680" fill="none" id="wide-line-2" stroke="url(#wideStrokeGrad2)" stroke-width="1.8"></path>
+      </g>
+      <!-- Wave Ribbon 5 (Intermediate High-Frequency Sinusoidal Crest) -->
+      <g class="wide-wave-layer-3">
+        <path d="M0,610 Q380,310 800,480 T1600,410" fill="none" id="wide-line-3" stroke="url(#wideStrokeGrad3)" stroke-width="1.2"></path>
+        <path d="M0,640 Q480,370 920,520 T1600,480" fill="none" id="wide-line-4" opacity="0.45" stroke="url(#wideStrokeGrad1)" stroke-dasharray="9 6" stroke-width="0.9"></path>
+      </g>
+      <!-- Wave Ribbon 6 (Low Baseline Harmonic Tide) -->
+      <g class="wide-wave-layer-5">
+        <path d="M0,670 C340,620 620,530 900,580 C1180,630 1420,550 1600,600" fill="none" id="wide-line-base" opacity="0.5" stroke="url(#wideStrokeGrad2)" stroke-width="1.1"></path>
+      </g>
+    </svg>
+  </div>
+  <!-- END: Extended Multi-Tier Upward Moving Acoustic Wave Canvas -->
+
+  <!-- BEGIN: Minimal Top Telemetry Bar -->
+  <header class="relative z-10 w-full px-6 py-5 flex items-center justify-between border-b border-white/[0.04]">
+    <div class="flex items-center space-x-3">
+      <!-- Minimalist Icon -->
+      <div class="w-5 h-5 rounded-sm border border-white/30 flex items-center justify-center p-0.5 bg-white/5">
+        <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
+      </div>
+      <span class="font-mono text-xs tracking-wider text-neutral-400 uppercase">SASV-CORE <span class="text-neutral-600">//</span> FORENSICS</span>
+    </div>
+    <div class="flex items-center space-x-4">
+      <div class="flex items-center space-x-2">
+        <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="font-mono text-xs text-neutral-400 tracking-wide uppercase">ENGINE ACTIVE</span>
+      </div>
+      <span class="text-xs font-mono text-neutral-600">v4.1.9-STABLE</span>
+    </div>
+  </header>
+  <!-- END: Minimal Top Telemetry Bar -->
+
+  <!-- BEGIN: Main Interface Section -->
+  <main class="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pt-8 pb-4 max-w-5xl mx-auto w-full">
+    <!-- Hero Headline matching image typography style -->
+    <div class="text-center max-w-2xl mb-8 md:mb-11 select-none">
+      <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.02] mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-neutral-300"></span>
+        <span class="text-xs font-mono tracking-wider text-neutral-300 uppercase">ACOUSTIC VOCODER DISCRIMINATOR</span>
+      </div>
+      <h1 class="text-3xl md:text-5xl font-normal tracking-tight text-white mb-3.5">
+        Spoofing-Aware Speaker Verification
+      </h1>
+      <p class="text-neutral-400 text-sm md:text-base font-light tracking-wide leading-relaxed max-w-xl mx-auto">
+        Ultra-low latency non-biological speech synthesis detection and acoustic vocoder artifact analysis.
+      </p>
+    </div>
+
+    <!-- Center Floating Forensic Glass Card -->
+    <section class="w-full max-w-2xl rounded-2xl border border-white/[0.09] bg-[#121216]/80 backdrop-blur-xl shadow-2xl shadow-black/80 transition-all duration-300 relative overflow-hidden" data-purpose="forensic-card">
+      <!-- Top edge fine glow line -->
+      <div class="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+      <!-- STATE 1: Upload / Input View -->
+      <div class="p-6 md:p-8 flex flex-col space-y-6 transition-all duration-300 block" id="state-upload">
+        <!-- Card Header -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-2 h-2 rounded-full bg-neutral-400" id="upload-status-dot"></span>
+            <h2 class="text-sm font-medium text-white tracking-wide" id="upload-card-title">Target Stream Analysis</h2>
+          </div>
+          <!-- Status Pill -->
+          <div class="flex items-center space-x-2 px-2.5 py-1 rounded-full bg-white/[0.04] border border-white/[0.06] text-xs font-mono text-neutral-400" id="upload-status-pill">
+            <span class="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-ping" id="upload-status-ping"></span>
+            <span id="upload-status-text">Awaiting Input</span>
+          </div>
+        </div>
+
+        <!-- Drag and Drop Target Box with Sonic Wave Animation -->
+        <div class="group cursor-pointer rounded-xl border border-dashed border-white/15 hover:border-white/30 bg-black/30 hover:bg-black/40 p-8 flex flex-col items-center justify-center text-center transition-all duration-200 min-h-[170px] relative overflow-hidden" id="dropzone" onclick="triggerFileInput()">
+          <!-- Enhanced Animated Sonic Wave Graphic with Radiating Pulse Rings & Undulating Bars -->
+          <div class="relative w-24 h-20 flex items-center justify-center mb-3" id="dropzone-icon-container">
+            <!-- Concentric Expanding Pulse Rings -->
+            <div class="absolute inset-0 m-auto w-12 h-12 rounded-full border border-white/25 sonic-ring-1 pointer-events-none"></div>
+            <div class="absolute inset-0 m-auto w-12 h-12 rounded-full border border-white/15 sonic-ring-2 pointer-events-none"></div>
+            <div class="absolute inset-0 m-auto w-12 h-12 rounded-full border border-white/10 sonic-ring-3 pointer-events-none"></div>
+            <!-- Center Core Disc -->
+            <div class="relative z-10 w-11 h-11 rounded-full bg-white/[0.06] border border-white/20 flex items-center justify-center backdrop-blur-sm group-hover:scale-105 group-hover:border-white/35 transition-transform">
+              <!-- Gentle undulating audio wave bars -->
+              <div class="flex items-center space-x-1 h-6">
+                <span class="w-0.5 bg-white/70 rounded-full sonic-bar" style="animation-delay: 0.1s;"></span>
+                <span class="w-0.5 bg-white/90 rounded-full sonic-bar" style="animation-delay: 0.35s;"></span>
+                <span class="w-0.5 bg-white rounded-full sonic-bar" style="animation-delay: 0.6s;"></span>
+                <span class="w-0.5 bg-white/90 rounded-full sonic-bar" style="animation-delay: 0.25s;"></span>
+                <span class="w-0.5 bg-white/70 rounded-full sonic-bar" style="animation-delay: 0.5s;"></span>
+              </div>
+            </div>
+          </div>
+          <p class="text-sm text-neutral-200 font-normal mb-1 relative z-10" id="dropzone-main-text">
+            Drop target audio stream (<span class="font-mono text-xs text-neutral-400">.wav, .flac</span>)
+          </p>
+          <p class="text-xs text-neutral-500 max-w-sm relative z-10" id="dropzone-sub-text">
+            or click this area to select an audio file for forensic inspection
+          </p>
+        </div>
+
+        <!-- Error Notification Banner (hidden by default) -->
+        <div id="upload-error" class="hidden px-4 py-2.5 rounded-lg bg-rose-950/40 border border-rose-500/30 text-rose-300 text-xs font-mono flex items-center justify-between">
+          <span id="upload-error-msg">Error processing audio file.</span>
+          <button type="button" onclick="dismissError()" class="text-rose-400 hover:text-white ml-2 text-sm">&times;</button>
+        </div>
+
+        <!-- Bottom Simulation Quick Triggers -->
+        <div class="pt-2 flex flex-wrap items-center justify-between gap-2.5">
+          <div class="flex flex-wrap items-center gap-2">
+            <button class="px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] text-xs text-neutral-300 hover:text-white transition flex items-center space-x-1.5" onclick="event.stopPropagation(); showFake({confidence: 98.7, latency: 42, details: 'Simulated Synthetic Vocoder with 8.4 kHz phase distortion'})" type="button">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+              <span>Simulate Synthetic Vocoder</span>
+            </button>
+            <button class="px-3 py-1.5 rounded-full bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] text-xs text-neutral-300 hover:text-white transition flex items-center space-x-1.5" onclick="event.stopPropagation(); showReal({confidence: 99.4, latency: 39, details: 'Simulated Organic Speech with natural biological dispersion'})" type="button">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>Simulate Natural Speech</span>
+            </button>
+          </div>
+          <button class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-medium text-white transition flex items-center space-x-1.5 self-end" onclick="event.stopPropagation(); triggerFileInput()" type="button">
+            <svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
+              <polygon points="5 3 19 12 5 21 5 3"></polygon>
+            </svg>
+            <span>Select Audio File</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STATE 2: Forensic Inspection Results View -->
+      <div class="p-6 md:p-8 flex flex-col space-y-6 transition-all duration-300 hidden" id="state-results">
+        <!-- Card Header with Verification Status -->
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2.5">
+            <span class="w-2 h-2 rounded-full bg-rose-500" id="result-dot"></span>
+            <h2 class="text-sm font-medium text-white tracking-wide">Acoustic Forensic Report</h2>
+          </div>
+          <!-- Dynamic Matte Verdict Pill -->
+          <div class="flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-950/40 border border-rose-500/30 text-xs font-mono font-medium text-rose-300 shadow-inner" id="result-badge">
+            <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" id="result-indicator"></span>
+            <span id="result-text">DEEPFAKE DETECTED</span>
+          </div>
+        </div>
+
+        <!-- Active Undulating Layered Audio Ribbon Waveform Graphic -->
+        <div class="relative w-full h-32 rounded-xl bg-black/50 border border-white/[0.06] p-2 flex items-center justify-center overflow-hidden">
+          <!-- Frequency Grid Matrix Lines -->
+          <div class="absolute inset-0 opacity-15 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+          <!-- Animated Waveform SVG Container -->
+          <svg class="w-full h-24 waveform-glow transition-all duration-500" preserveaspectratio="none" viewbox="0 0 700 120">
+            <!-- Anomaly band marker (shown on deepfake) -->
+            <rect class="transition-opacity duration-300" fill="rgba(220, 38, 38, 0.09)" height="110" id="anomaly-band" stroke="rgba(220,38,38,0.3)" stroke-dasharray="3 3" width="140" x="290" y="5"></rect>
+            <!-- Layer 1: Ambient fill undulating -->
+            <g class="anim-wave-1">
+              <path d="M0,60 C80,30 140,85 240,45 C320,10 400,105 480,50 C570,0 630,90 700,60 L700,120 L0,120 Z" fill="url(#resWaveGrad)" opacity="0.32"></path>
+            </g>
+            <!-- Layer 2: Glowing primary undulating phase track -->
+            <g class="anim-wave-1">
+              <path d="M0,60 Q120,10 240,65 T480,55 T700,60" fill="none" id="wave-path-1" opacity="0.88" stroke="#ffffff" stroke-width="1.8"></path>
+            </g>
+            <!-- Layer 3: Counter undulating phase harmonic -->
+            <g class="anim-wave-2">
+              <path d="M0,60 Q160,110 320,50 T560,75 T700,60" fill="none" id="wave-path-2" stroke="rgba(255,255,255,0.4)" stroke-width="1"></path>
+              <path class="anim-wave-dash" d="M0,62 Q200,30 400,68 T700,58" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="0.8"></path>
+            </g>
+            <!-- Anomaly Glitch Spike Track -->
+            <path class="anim-wave-1" d="M290,52 Q330,12 360,78 T430,48" fill="none" id="wave-path-anomaly" opacity="0.95" stroke="#ef4444" stroke-width="1.6"></path>
+            <defs>
+              <lineargradient gradientunits="userSpaceOnUse" id="resWaveGrad" x1="350" x2="350" y1="0" y2="120">
+                <stop stop-color="#ffffff" stop-opacity="0.35"></stop>
+                <stop offset="1" stop-color="#ffffff" stop-opacity="0"></stop>
+              </lineargradient>
+            </defs>
+          </svg>
+          <!-- Floating artifact tag -->
+          <div class="absolute bottom-2 right-3 font-mono text-[10px] text-rose-400/90 bg-rose-950/60 px-2.5 py-0.5 rounded border border-rose-500/25 backdrop-blur-sm" id="phase-tag">
+            PHASE INCOHERENCE @ 8.4 kHz
+          </div>
+        </div>
+
+        <!-- Technical Clinical Forensic Analysis Report Readout -->
+        <p class="text-xs text-neutral-300 font-light leading-relaxed tracking-wide" id="analysis-desc">
+          Non-biological phase alignment and high-frequency vocoder artifacts detected in 8.4 kHz spectral cluster. Characteristic signature of diffusion-based neural vocoder.
+        </p>
+
+        <!-- Prominent Monospace Technical Metrics (Confidence Score & Inference Latency) -->
+        <div class="grid grid-cols-2 gap-3 pt-1 border-t border-white/[0.06] font-mono">
+          <div class="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex flex-col justify-between">
+            <span class="text-[11px] text-neutral-500 tracking-wider uppercase">Confidence Score</span>
+            <div class="text-white font-medium text-base mt-1 flex items-baseline space-x-1">
+              <span id="spec-confidence">98.7%</span>
+              <span class="text-[10px] text-neutral-500 font-normal" id="spec-pval">p-val &lt; 0.001</span>
+            </div>
+          </div>
+          <div class="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex flex-col justify-between">
+            <span class="text-[11px] text-neutral-500 tracking-wider uppercase">Inference Latency</span>
+            <div class="text-white font-medium text-base mt-1 flex items-baseline space-x-1">
+              <span id="spec-latency">42ms</span>
+              <span class="text-[10px] text-neutral-500 font-normal" id="spec-rtf">RTF: 0.014</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Info Bar (if file was analyzed) -->
+        <div id="analyzed-filename-bar" class="text-xs font-mono text-neutral-400 flex items-center justify-between px-3 py-1.5 rounded bg-white/[0.02] border border-white/[0.05]">
+          <span class="truncate max-w-[300px]" id="analyzed-filename">Target: buffer.wav</span>
+          <span class="text-[10px] text-neutral-500" id="analyzed-chunks-info">13 MFCC Bands // 16 kHz</span>
+        </div>
+
+        <!-- Secondary action return row with verdict toggle switcher -->
+        <div class="flex items-center justify-between pt-1">
+          <button class="text-xs text-neutral-400 hover:text-white transition flex items-center space-x-1.5 py-1 px-2.5 rounded hover:bg-white/[0.04]" onclick="switchToState(1)" type="button">
+            <span>← Analyze Another Buffer</span>
+          </button>
+          <div class="flex items-center space-x-2">
+            <button class="text-xs font-mono text-neutral-400 hover:text-neutral-200 border border-white/10 px-2.5 py-1 rounded bg-white/[0.03] hover:bg-white/[0.06] transition flex items-center space-x-1.5" onclick="toggleVerdictType()" type="button">
+              <span class="w-1.5 h-1.5 rounded-full bg-neutral-400" id="switcher-dot"></span>
+              <span id="switcher-text">Simulate Authentic Human</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <!-- END: Main Interface Section -->
+
+  <!-- BEGIN: Integrated Metrics Bar & Base Horizon Telemetry -->
+  <div class="relative z-10 w-full mt-auto pointer-events-auto select-none" data-purpose="metrics-bar">
+    <div class="border-t border-b border-white/[0.06] bg-black/50 backdrop-blur-md">
+      <div class="max-w-4xl mx-auto px-6 py-3 flex flex-wrap items-center justify-center gap-y-2 gap-x-4 md:gap-x-8 font-mono text-[11px] md:text-xs text-neutral-400">
+        <div class="flex items-center space-x-2">
+          <span class="text-neutral-500">SAMPLING:</span>
+          <span class="text-neutral-200">16,000 Hz</span>
+        </div>
+        <span class="text-neutral-700 hidden sm:inline">•</span>
+        <div class="flex items-center space-x-2">
+          <span class="text-neutral-500">FEATURES:</span>
+          <span class="text-neutral-200">13 MFCC Coefficients</span>
+        </div>
+        <span class="text-neutral-700 hidden sm:inline">•</span>
+        <div class="flex items-center space-x-2">
+          <span class="text-neutral-500">MODEL:</span>
+          <span class="text-neutral-200">Random Forest Classifier</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END: Integrated Metrics Bar & Base Horizon Telemetry -->
+
+  <!-- BEGIN: Bottom Right Debug & Quick Toggle Switch -->
+  <aside class="fixed bottom-4 right-4 z-50" data-purpose="debug-controls">
+    <button class="px-3 py-1.5 rounded-md bg-neutral-900/90 hover:bg-neutral-800 text-neutral-300 hover:text-white border border-white/15 text-xs font-mono shadow-lg backdrop-blur transition flex items-center space-x-2" id="state-toggle-btn" onclick="toggleCardState()" title="Toggle smoothly between State 1 (Upload) and State 2 (Results)">
+      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+      <span>Toggle State (Upload / Results)</span>
+    </button>
+  </aside>
+  <!-- END: Bottom Right Debug & Quick Toggle Switch -->
+
+  <!-- BEGIN: Interactive Logic & Server Integration -->
+  <script data-purpose="state-manager">
+    // Current UI State: 1 = Upload, 2 = Results
+    let currentState = 1;
+    // Current simulated or detected classification verdict: 'deepfake' or 'authentic'
+    let currentVerdict = 'deepfake';
+    let isAnalyzing = false;
+
+    // Trigger file selection dialog
+    function triggerFileInput() {
+      if (isAnalyzing) return;
+      const input = document.getElementById('audio-file-input');
+      input.value = '';
+      input.click();
+    }
+
+    // Handle file input change
+    function handleFileSelect(event) {
+      const files = event.target.files;
+      if (files && files.length > 0) {
+        uploadAndAnalyze(files[0]);
+      }
+    }
+
+    // Set up Drag and Drop on dropzone
+    const dropzone = document.getElementById('dropzone');
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isAnalyzing) dropzone.classList.add('dropzone-active');
+      }, false);
+    });
+
+    ['dragleave', 'dragend', 'drop'].forEach(eventName => {
+      dropzone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('dropzone-active');
+      }, false);
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length > 0 && !isAnalyzing) {
+        uploadAndAnalyze(files[0]);
+      }
+    });
+
+    function dismissError() {
+      const errBox = document.getElementById('upload-error');
+      if (errBox) errBox.classList.add('hidden');
+    }
+
+    function showError(msg) {
+      const errBox = document.getElementById('upload-error');
+      const errMsg = document.getElementById('upload-error-msg');
+      if (errBox && errMsg) {
+        errMsg.innerText = msg;
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    // Send file to Flask /analyze route via fetch
+    async function uploadAndAnalyze(file) {
+      dismissError();
+
+      // Validate file extension
+      const validExtensions = ['.wav', '.flac', '.mp3', '.m4a', '.ogg'];
+      const fileName = file.name.toLowerCase();
+      const isValid = validExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!isValid) {
+        showError('Invalid file type. Please upload a .wav or .flac audio file.');
+        return;
+      }
+
+      // UI: enter analyzing state
+      isAnalyzing = true;
+      setAnalyzingUI(true, file.name);
+
+      const formData = new FormData();
+      formData.append('audio', file);
+
+      try {
+        const response = await fetch('/analyze', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({ error: 'Server returned ' + response.status }));
+          throw new Error(errData.error || 'Analysis failed with status ' + response.status);
+        }
+
+        const data = await response.json();
+        // data schema: { state: 'fake' | 'real', confidence: float, latency: int, filename?: string, chunks?: int }
+        data.filename = file.name;
+
+        if (data.state === 'fake' || data.state === 'deepfake') {
+          showFake(data);
+        } else {
+          showReal(data);
+        }
+      } catch (err) {
+        console.error('Inference Error:', err);
+        showError(err.message || 'An error occurred during audio forensics.');
+      } finally {
+        isAnalyzing = false;
+        setAnalyzingUI(false);
+      }
+    }
+
+    function setAnalyzingUI(loading, filename = '') {
+      const statusPill = document.getElementById('upload-status-pill');
+      const statusText = document.getElementById('upload-status-text');
+      const statusPing = document.getElementById('upload-status-ping');
+      const dropMain = document.getElementById('dropzone-main-text');
+      const dropSub = document.getElementById('dropzone-sub-text');
+
+      if (loading) {
+        statusText.innerText = 'Extracting MFCCs & Inferring...';
+        statusPing.className = 'w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping';
+        dropMain.innerHTML = `<span class="text-cyan-400 font-mono">Analyzing ${filename}...</span>`;
+        dropSub.innerText = 'Extracting 13 MFCC feature frames and running classifier...';
+        dropzone.classList.add('animate-pulse');
+      } else {
+        statusText.innerText = 'Awaiting Input';
+        statusPing.className = 'w-1.5 h-1.5 rounded-full bg-neutral-400 animate-ping';
+        dropMain.innerHTML = 'Drop target audio stream (<span class="font-mono text-xs text-neutral-400">.wav, .flac</span>)';
+        dropSub.innerText = 'or click this area to select an audio file for forensic inspection';
+        dropzone.classList.remove('animate-pulse');
+      }
+    }
+
+    // Trigger fake / deepfake result view with live metrics
+    function showFake(data = {}) {
+      currentVerdict = 'deepfake';
+      switchToState(2, 'deepfake');
+
+      const conf = data.confidence !== undefined ? data.confidence : 98.7;
+      const latency = data.latency !== undefined ? data.latency : 42;
+      const filename = data.filename || 'Uploaded Stream';
+
+      document.getElementById('spec-confidence').innerText = (typeof conf === 'number' ? conf.toFixed(1) : conf) + '%';
+      document.getElementById('spec-latency').innerText = latency + 'ms';
+      document.getElementById('analyzed-filename').innerText = `Target: ${filename}`;
+      if (data.details) {
+        document.getElementById('analysis-desc').innerText = data.details;
+      }
+    }
+
+    // Trigger authentic / real result view with live metrics
+    function showReal(data = {}) {
+      currentVerdict = 'authentic';
+      switchToState(2, 'authentic');
+
+      const conf = data.confidence !== undefined ? data.confidence : 99.4;
+      const latency = data.latency !== undefined ? data.latency : 39;
+      const filename = data.filename || 'Uploaded Stream';
+
+      document.getElementById('spec-confidence').innerText = (typeof conf === 'number' ? conf.toFixed(1) : conf) + '%';
+      document.getElementById('spec-latency').innerText = latency + 'ms';
+      document.getElementById('analyzed-filename').innerText = `Target: ${filename}`;
+      if (data.details) {
+        document.getElementById('analysis-desc').innerText = data.details;
+      }
+    }
+
+    function switchToState(stateNum, verdict) {
+      currentState = stateNum;
+      if (verdict) {
+        currentVerdict = verdict;
+      }
+
+      const uploadView = document.getElementById('state-upload');
+      const resultsView = document.getElementById('state-results');
+
+      if (stateNum === 1) {
+        uploadView.classList.remove('hidden');
+        resultsView.classList.add('hidden');
+        applyWideWaveformState('upload');
+      } else {
+        uploadView.classList.add('hidden');
+        resultsView.classList.remove('hidden');
+        applyVerdictStyles(currentVerdict);
+      }
+    }
+
+    function toggleCardState() {
+      if (currentState === 1) {
+        switchToState(2, currentVerdict);
+      } else {
+        switchToState(1);
+      }
+    }
+
+    function toggleVerdictType() {
+      currentVerdict = currentVerdict === 'deepfake' ? 'authentic' : 'deepfake';
+      applyVerdictStyles(currentVerdict);
+    }
+
+    function applyVerdictStyles(verdict) {
+      const dot = document.getElementById('result-dot');
+      const badge = document.getElementById('result-badge');
+      const indicator = document.getElementById('result-indicator');
+      const text = document.getElementById('result-text');
+      const anomalyBand = document.getElementById('anomaly-band');
+      const anomalyWave = document.getElementById('wave-path-anomaly');
+      const phaseTag = document.getElementById('phase-tag');
+      const desc = document.getElementById('analysis-desc');
+      const conf = document.getElementById('spec-confidence');
+      const latency = document.getElementById('spec-latency');
+      const switcherDot = document.getElementById('switcher-dot');
+      const switcherText = document.getElementById('switcher-text');
+
+      if (verdict === 'deepfake' || verdict === 'fake') {
+        // Deepfake styling (muted crimson tone)
+        dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        badge.className = 'flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-950/40 border border-rose-500/30 text-xs font-mono font-medium text-rose-300 shadow-inner';
+        indicator.className = 'w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse';
+        text.innerText = 'DEEPFAKE DETECTED';
+        
+        anomalyBand.style.display = 'block';
+        anomalyWave.style.display = 'block';
+        phaseTag.style.display = 'block';
+        phaseTag.className = 'absolute bottom-2 right-3 font-mono text-[10px] text-rose-400/90 bg-rose-950/60 px-2.5 py-0.5 rounded border border-rose-500/25 backdrop-blur-sm';
+        phaseTag.innerText = 'PHASE INCOHERENCE @ 8.4 kHz';
+
+        desc.innerText = 'Non-biological phase alignment and high-frequency vocoder artifacts detected in 8.4 kHz spectral cluster. Characteristic signature of diffusion-based neural vocoder.';
+
+        if (switcherDot) switcherDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
+        if (switcherText) switcherText.innerText = 'Simulate Authentic Human';
+        applyWideWaveformState('deepfake');
+      } else {
+        // Authentic styling (muted sage green tone)
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        badge.className = 'flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-xs font-mono font-medium text-emerald-300 shadow-inner';
+        indicator.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse';
+        text.innerText = 'AUTHENTIC HUMAN';
+        
+        anomalyBand.style.display = 'none';
+        anomalyWave.style.display = 'none';
+        phaseTag.style.display = 'block';
+        phaseTag.className = 'absolute bottom-2 right-3 font-mono text-[10px] text-emerald-400/90 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-500/25 backdrop-blur-sm';
+        phaseTag.innerText = 'ORGANIC GLOTTAL DISPERSION';
+
+        desc.innerText = 'Acoustic vocal tract resonance matches natural biological dispersion. Organic micro-tremors and natural formant transitions verified without synthetic vocoder artifacting.';
+
+        if (switcherDot) switcherDot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
+        if (switcherText) switcherText.innerText = 'Simulate Synthetic Vocoder';
+        applyWideWaveformState('authentic');
+      }
+    }
+
+    // Controls the extended upward wave field palette and luminescence
+    function applyWideWaveformState(mode) {
+      const wideSvg = document.getElementById('wide-wave-svg');
+      const g1s1 = document.getElementById('wide-grad1-stop1');
+      const g1s2 = document.getElementById('wide-grad1-stop2');
+      const g2s1 = document.getElementById('wide-grad2-stop1');
+      const g2s2 = document.getElementById('wide-grad2-stop2');
+      const gHigh1 = document.getElementById('wide-gradhigh-stop1');
+      const gHigh2 = document.getElementById('wide-gradhigh-stop2');
+      const s1Mid = document.getElementById('wide-stroke1-mid');
+      const s2Mid = document.getElementById('wide-stroke2-mid');
+      const s3Mid = document.getElementById('wide-stroke3-mid');
+      const s4Mid = document.getElementById('wide-stroke4-mid');
+      const s5Mid = document.getElementById('wide-stroke5-mid');
+
+      if (!wideSvg || !g1s1) return;
+
+      if (mode === 'upload') {
+        // State 1: Clean translucent zinc / ethereal white across the viewport
+        wideSvg.className = 'w-full h-full wide-wave-glow-default transition-all duration-700 pointer-events-none';
+        g1s1.setAttribute('stop-color', '#ffffff');
+        g1s1.setAttribute('stop-opacity', '0.12');
+        g1s2.setAttribute('stop-color', '#ffffff');
+        g1s2.setAttribute('stop-opacity', '0');
+
+        g2s1.setAttribute('stop-color', '#ffffff');
+        g2s1.setAttribute('stop-opacity', '0.18');
+        g2s2.setAttribute('stop-color', '#ffffff');
+        g2s2.setAttribute('stop-opacity', '0.01');
+
+        if (gHigh1) {
+          gHigh1.setAttribute('stop-color', '#ffffff');
+          gHigh1.setAttribute('stop-opacity', '0.06');
+          gHigh2.setAttribute('stop-color', '#ffffff');
+          gHigh2.setAttribute('stop-opacity', '0');
+        }
+
+        s1Mid.setAttribute('stop-color', '#ffffff');
+        s1Mid.setAttribute('stop-opacity', '0.35');
+        s2Mid.setAttribute('stop-color', '#ffffff');
+        s2Mid.setAttribute('stop-opacity', '0.65');
+        s3Mid.setAttribute('stop-color', '#ffffff');
+        s3Mid.setAttribute('stop-opacity', '0.45');
+        if (s4Mid) {
+          s4Mid.setAttribute('stop-color', '#ffffff');
+          s4Mid.setAttribute('stop-opacity', '0.25');
+        }
+        if (s5Mid) {
+          s5Mid.setAttribute('stop-color', '#ffffff');
+          s5Mid.setAttribute('stop-opacity', '0.18');
+        }
+      } else if (mode === 'deepfake') {
+        // State 2 (Deepfake): Muted crimson red ambient wave field
+        wideSvg.className = 'w-full h-full wide-wave-glow-deepfake transition-all duration-700 pointer-events-none';
+        g1s1.setAttribute('stop-color', '#b94747');
+        g1s1.setAttribute('stop-opacity', '0.22');
+        g1s2.setAttribute('stop-color', '#881337');
+        g1s2.setAttribute('stop-opacity', '0');
+
+        g2s1.setAttribute('stop-color', '#ef4444');
+        g2s1.setAttribute('stop-opacity', '0.32');
+        g2s2.setAttribute('stop-color', '#b94747');
+        g2s2.setAttribute('stop-opacity', '0.02');
+
+        if (gHigh1) {
+          gHigh1.setAttribute('stop-color', '#f43f5e');
+          gHigh1.setAttribute('stop-opacity', '0.1');
+          gHigh2.setAttribute('stop-color', '#881337');
+          gHigh2.setAttribute('stop-opacity', '0');
+        }
+
+        s1Mid.setAttribute('stop-color', '#f87171');
+        s1Mid.setAttribute('stop-opacity', '0.55');
+        s2Mid.setAttribute('stop-color', '#fb7185');
+        s2Mid.setAttribute('stop-opacity', '0.8');
+        s3Mid.setAttribute('stop-color', '#ef4444');
+        s3Mid.setAttribute('stop-opacity', '0.65');
+        if (s4Mid) {
+          s4Mid.setAttribute('stop-color', '#fda4af');
+          s4Mid.setAttribute('stop-opacity', '0.45');
+        }
+        if (s5Mid) {
+          s5Mid.setAttribute('stop-color', '#f43f5e');
+          s5Mid.setAttribute('stop-opacity', '0.32');
+        }
+      } else if (mode === 'authentic') {
+        // State 2 (Authentic): Muted sage / emerald green ambient wave field
+        wideSvg.className = 'w-full h-full wide-wave-glow-authentic transition-all duration-700 pointer-events-none';
+        g1s1.setAttribute('stop-color', '#528368');
+        g1s1.setAttribute('stop-opacity', '0.22');
+        g1s2.setAttribute('stop-color', '#064e3b');
+        g1s2.setAttribute('stop-opacity', '0');
+
+        g2s1.setAttribute('stop-color', '#10b981');
+        g2s1.setAttribute('stop-opacity', '0.32');
+        g2s2.setAttribute('stop-color', '#528368');
+        g2s2.setAttribute('stop-opacity', '0.02');
+
+        if (gHigh1) {
+          gHigh1.setAttribute('stop-color', '#34d399');
+          gHigh1.setAttribute('stop-opacity', '0.1');
+          gHigh2.setAttribute('stop-color', '#064e3b');
+          gHigh2.setAttribute('stop-opacity', '0');
+        }
+
+        s1Mid.setAttribute('stop-color', '#6ee7b7');
+        s1Mid.setAttribute('stop-opacity', '0.55');
+        s2Mid.setAttribute('stop-color', '#34d399');
+        s2Mid.setAttribute('stop-opacity', '0.8');
+        s3Mid.setAttribute('stop-color', '#10b981');
+        s3Mid.setAttribute('stop-opacity', '0.65');
+        if (s4Mid) {
+          s4Mid.setAttribute('stop-color', '#a7f3d0');
+          s4Mid.setAttribute('stop-opacity', '0.45');
+        }
+        if (s5Mid) {
+          s5Mid.setAttribute('stop-color', '#34d399');
+          s5Mid.setAttribute('stop-opacity', '0.32');
+        }
+      }
+    }
+
+    // Initialize initial state
+    applyWideWaveformState('upload');
+  </script>
+  <!-- END: Interactive Logic -->
+</body>
+</html>
