@@ -2,7 +2,7 @@
   "project_name": "deepfake-voice-detector",
   "version": "review3",
   "seed": 42,
-  "theta_dev": null,
+  "theta_dev": 0.76,
   "audio": {
     "sample_rate": 16000,
     "frame_duration": 0.5,
@@ -24,7 +24,10 @@
     "random_state": 42
   },
   "evaluation": {
-    "theta_dev": null,
-    "metric": "EER"
-  }
+    "theta_dev": 0.76,
+    "metric": "EER",
+    "aggregation": "top20",
+    "eer_dev": 0.0
+  },
+  "aggregation": "top20"
 }
