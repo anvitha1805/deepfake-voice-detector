@@ -314,7 +314,7 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-white/20 selection:text-white relative font-sans antialiased text-sm">
   <!-- Hidden File Input for Audio Upload -->
-  <input type="file" id="audio-file-input" accept=".wav,.flac,audio/wav,audio/flac,audio/x-wav,audio/*" class="hidden" onchange="handleFileSelect(event)"/>
+  <input type="file" id="audio-file-input" name="audio" accept=".wav,.flac,.mp3,.m4a,.ogg,audio/wav,audio/flac,audio/x-wav,audio/*" class="hidden" onchange="handleFileSelect(event)"/>
 
   <!-- BEGIN: Background Atmosphere Components -->
   <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
@@ -503,7 +503,6 @@
               <span>Simulate Natural Speech</span>
             </button>
           </div>
-          <input type="file" id="audio-file-input" name="audio" accept=".wav,.flac,.mp3,.m4a,.ogg" onchange="handleFileSelect(event)" class="hidden" />
           <button class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-medium text-white transition flex items-center space-x-1.5 self-end" onclick="event.stopPropagation(); triggerFileInput()" type="button">
             <svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -699,8 +698,10 @@
     function triggerFileInput() {
       if (isAnalyzing) return;
       const input = document.getElementById('audio-file-input');
-      input.value = '';
-      input.click();
+      if (input) {
+        input.value = '';
+        input.click();
+      }
     }
 
     // Handle file input change
@@ -903,7 +904,8 @@
       if (thresholdVal) thresholdVal.innerText = `θ = ${theta.toFixed(2)}`;
       if (aggTag) aggTag.innerText = `${agg} chunk agg`;
       if (specLatency) specLatency.innerText = `${latency}ms`;
-      if (specConfidence) specConfidence.innerText = `${(isFake ? score : (1 - score)) * 100).toFixed(1)}%`;
+      const confPercent = ((isFake ? score : (1.0 - score)) * 100.0).toFixed(1);
+      if (specConfidence) specConfidence.innerText = `${confPercent}%`;
 
       // Update Filename & Frames
       const fileEl = document.getElementById('analyzed-filename');
