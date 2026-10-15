@@ -503,6 +503,7 @@
               <span>Simulate Natural Speech</span>
             </button>
           </div>
+          <input type="file" id="audio-file-input" name="audio" accept=".wav,.flac,.mp3,.m4a,.ogg" onchange="handleFileSelect(event)" class="hidden" />
           <button class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 border border-white/20 text-xs font-medium text-white transition flex items-center space-x-1.5 self-end" onclick="event.stopPropagation(); triggerFileInput()" type="button">
             <svg class="w-3.5 h-3.5 fill-current" viewbox="0 0 24 24">
               <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -513,7 +514,7 @@
       </div>
 
       <!-- STATE 2: Forensic Inspection Results View -->
-      <div class="p-6 md:p-8 flex flex-col space-y-6 transition-all duration-300 hidden" id="state-results">
+      <div class="p-6 md:p-8 flex flex-col space-y-5 transition-all duration-300 hidden" id="state-results">
         <!-- Card Header with Verification Status -->
         <div class="flex items-center justify-between">
           <div class="flex items-center space-x-2.5">
@@ -527,12 +528,48 @@
           </div>
         </div>
 
+        <!-- Prominent Primary Real / Fake Verdict Banner -->
+        <div class="p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300 bg-rose-950/30 border-rose-500/30" id="verdict-banner-container">
+          <div class="flex items-center space-x-3.5">
+            <div class="w-11 h-11 rounded-lg flex items-center justify-center font-mono font-bold text-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.25)]" id="verdict-icon-box">
+              <span id="verdict-icon">⚠️</span>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono tracking-widest uppercase text-neutral-400 block">Final Classification</span>
+              <div class="text-2xl font-bold font-mono tracking-tight text-rose-400" id="verdict-main-heading">DEEPFAKE</div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:items-end font-mono">
+            <span class="text-[10px] tracking-widest uppercase text-neutral-400">Spoof Probability Score</span>
+            <div class="text-2xl font-bold text-rose-300" id="verdict-prob-heading">98.7%</div>
+          </div>
+        </div>
+
+        <!-- Threshold Decision Gauge Visualizer -->
+        <div class="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.06] flex flex-col space-y-2 font-mono text-xs">
+          <div class="flex justify-between items-center text-[11px] text-neutral-400">
+            <span class="text-emerald-400 font-medium">0.0 (Real)</span>
+            <span class="text-amber-400 font-medium">Threshold θ_dev = <span id="gauge-theta-val">0.76</span></span>
+            <span class="text-rose-400 font-medium">1.0 (Deepfake)</span>
+          </div>
+          <div class="relative w-full h-3.5 bg-neutral-900 rounded-full overflow-hidden border border-white/10 p-0.5">
+            <div class="h-full transition-all duration-700 rounded-full bg-gradient-to-r from-emerald-500 via-amber-500 to-rose-500" id="gauge-prob-bar" style="width: 85%;"></div>
+            <!-- Threshold marker pin -->
+            <div class="absolute top-0 bottom-0 w-1 bg-amber-400 z-10 shadow-[0_0_8px_#f59e0b]" id="gauge-threshold-line" style="left: 76%;" title="Threshold: 0.76"></div>
+          </div>
+          <div class="flex justify-between items-center text-[10px] text-neutral-500">
+            <span class="text-emerald-500/80">← Safe Biological Range</span>
+            <span id="gauge-status-text" class="text-neutral-300 font-medium">Score: 0.8524 // Exceeds Threshold</span>
+            <span class="text-rose-500/80">Synthetic Range →</span>
+          </div>
+        </div>
+
         <!-- Active Undulating Layered Audio Ribbon Waveform Graphic -->
-        <div class="relative w-full h-32 rounded-xl bg-black/50 border border-white/[0.06] p-2 flex items-center justify-center overflow-hidden">
+        <div class="relative w-full h-28 rounded-xl bg-black/50 border border-white/[0.06] p-2 flex items-center justify-center overflow-hidden">
           <!-- Frequency Grid Matrix Lines -->
           <div class="absolute inset-0 opacity-15 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:24px_24px]"></div>
           <!-- Animated Waveform SVG Container -->
-          <svg class="w-full h-24 waveform-glow transition-all duration-500" preserveaspectratio="none" viewbox="0 0 700 120">
+          <svg class="w-full h-20 waveform-glow transition-all duration-500" preserveaspectratio="none" viewbox="0 0 700 120">
             <!-- Anomaly band marker (shown on deepfake) -->
             <rect class="transition-opacity duration-300" fill="rgba(220, 38, 38, 0.09)" height="110" id="anomaly-band" stroke="rgba(220,38,38,0.3)" stroke-dasharray="3 3" width="140" x="290" y="5"></rect>
             <!-- Layer 1: Ambient fill undulating -->
@@ -568,27 +605,36 @@
           Non-biological phase alignment and high-frequency vocoder artifacts detected in 8.4 kHz spectral cluster. Characteristic signature of diffusion-based neural vocoder.
         </p>
 
-        <!-- Prominent Monospace Technical Metrics (Confidence Score & Inference Latency) -->
-        <div class="grid grid-cols-2 gap-3 pt-1 border-t border-white/[0.06] font-mono">
+        <!-- Prominent Monospace Technical Metrics (Prediction, Probability Score, Threshold, Latency) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1 border-t border-white/[0.06] font-mono">
           <div class="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex flex-col justify-between">
-            <span class="text-[11px] text-neutral-500 tracking-wider uppercase">Confidence Score</span>
-            <div class="text-white font-medium text-base mt-1 flex items-baseline space-x-1">
-              <span id="spec-confidence">98.7%</span>
-              <span class="text-[10px] text-neutral-500 font-normal" id="spec-pval">p-val &lt; 0.001</span>
-            </div>
+            <span class="text-[10px] text-neutral-500 tracking-wider uppercase">Verdict</span>
+            <div class="text-rose-400 font-bold text-sm mt-1" id="spec-verdict-tag">DEEPFAKE</div>
+            <span class="text-[9px] text-neutral-500" id="spec-verdict-sub">Spoof detected</span>
           </div>
           <div class="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex flex-col justify-between">
-            <span class="text-[11px] text-neutral-500 tracking-wider uppercase">Inference Latency</span>
-            <div class="text-white font-medium text-base mt-1 flex items-baseline space-x-1">
-              <span id="spec-latency">42ms</span>
-              <span class="text-[10px] text-neutral-500 font-normal" id="spec-rtf">RTF: 0.014</span>
-            </div>
+            <span class="text-[10px] text-neutral-500 tracking-wider uppercase">Score</span>
+            <div class="text-white font-medium text-sm mt-1" id="spec-prob-score">0.9870</div>
+            <span class="text-[9px] text-neutral-500" id="spec-prob-pct">98.7% spoof prob</span>
+          </div>
+          <div class="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex flex-col justify-between">
+            <span class="text-[10px] text-neutral-500 tracking-wider uppercase">Threshold</span>
+            <div class="text-amber-300 font-medium text-sm mt-1" id="spec-threshold-val">θ = 0.76</div>
+            <span class="text-[9px] text-neutral-500" id="spec-aggregation-tag">top20 chunk agg</span>
+          </div>
+          <div class="p-3 rounded-lg bg-white/[0.02] border border-white/[0.06] flex flex-col justify-between">
+            <span class="text-[10px] text-neutral-500 tracking-wider uppercase">Latency</span>
+            <div class="text-white font-medium text-sm mt-1" id="spec-latency">42ms</div>
+            <span class="text-[9px] text-neutral-500" id="spec-rtf">RTF: 0.014</span>
           </div>
         </div>
 
+        <!-- Hidden confidence element preserved for JS compatibility -->
+        <span id="spec-confidence" class="hidden">98.7%</span>
+
         <!-- File Info Bar (if file was analyzed) -->
         <div id="analyzed-filename-bar" class="text-xs font-mono text-neutral-400 flex items-center justify-between px-3 py-1.5 rounded bg-white/[0.02] border border-white/[0.05]">
-          <span class="truncate max-w-[300px]" id="analyzed-filename">Target: buffer.wav</span>
+          <span class="truncate max-w-[280px]" id="analyzed-filename">Target: buffer.wav</span>
           <span class="text-[10px] text-neutral-500" id="analyzed-chunks-info">13 MFCC Bands // 16 kHz</span>
         </div>
 
@@ -739,13 +785,13 @@
         }
 
         const data = await response.json();
-        // data schema: { state: 'fake' | 'real', confidence: float, latency: int, filename?: string, chunks?: int }
         data.filename = file.name;
 
-        if (data.state === 'fake' || data.state === 'deepfake') {
-          showFake(data);
-        } else {
+        // Route based on final Real / Deepfake prediction
+        if (data.prediction === 'Real' || data.state === 'real' || data.state === 'authentic') {
           showReal(data);
+        } else {
+          showFake(data);
         }
       } catch (err) {
         console.error('Inference Error:', err);
@@ -778,38 +824,112 @@
       }
     }
 
+    let lastAnalysisData = null;
+
+    function updateResultsUI(data, verdict) {
+      const isFake = (verdict === 'deepfake' || verdict === 'fake');
+      const score = (data.score !== undefined) ? Number(data.score) : 
+                    ((data.probability !== undefined) ? Number(data.probability) : (isFake ? 0.987 : 0.042));
+      const theta = (data.theta_dev !== undefined) ? Number(data.theta_dev) : 0.76;
+      const agg = data.aggregation || 'top20';
+      const latency = data.latency !== undefined ? data.latency : 42;
+      const filename = data.filename || 'Target Audio';
+      const chunks = data.chunks !== undefined ? data.chunks : 8;
+
+      // Update Verdict Banner
+      const banner = document.getElementById('verdict-banner-container');
+      const iconBox = document.getElementById('verdict-icon-box');
+      const icon = document.getElementById('verdict-icon');
+      const mainHeading = document.getElementById('verdict-main-heading');
+      const probHeading = document.getElementById('verdict-prob-heading');
+
+      if (banner) {
+        banner.className = isFake
+          ? 'p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300 bg-rose-950/30 border-rose-500/30'
+          : 'p-4 rounded-xl border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 transition-all duration-300 bg-emerald-950/30 border-emerald-500/30';
+      }
+      if (iconBox) {
+        iconBox.className = isFake
+          ? 'w-11 h-11 rounded-lg flex items-center justify-center font-mono font-bold text-xl bg-rose-500/20 text-rose-400 border border-rose-500/40 shadow-[0_0_15px_rgba(244,63,94,0.25)]'
+          : 'w-11 h-11 rounded-lg flex items-center justify-center font-mono font-bold text-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.25)]';
+      }
+      if (icon) icon.innerText = isFake ? '⚠️' : '✓';
+      if (mainHeading) {
+        mainHeading.innerText = isFake ? 'DEEPFAKE' : 'REAL';
+        mainHeading.className = isFake ? 'text-2xl font-bold font-mono tracking-tight text-rose-400' : 'text-2xl font-bold font-mono tracking-tight text-emerald-400';
+      }
+      if (probHeading) {
+        probHeading.innerText = (score * 100).toFixed(1) + '%';
+        probHeading.className = isFake ? 'text-2xl font-bold text-rose-300' : 'text-2xl font-bold text-emerald-300';
+      }
+
+      // Update Decision Gauge
+      const gaugeTheta = document.getElementById('gauge-theta-val');
+      const gaugeBar = document.getElementById('gauge-prob-bar');
+      const gaugeLine = document.getElementById('gauge-threshold-line');
+      const gaugeStatus = document.getElementById('gauge-status-text');
+
+      if (gaugeTheta) gaugeTheta.innerText = theta.toFixed(2);
+      if (gaugeLine) gaugeLine.style.left = (theta * 100) + '%';
+      if (gaugeBar) {
+        gaugeBar.style.width = Math.min(100, Math.max(3, score * 100)) + '%';
+      }
+      if (gaugeStatus) {
+        gaugeStatus.innerText = isFake 
+          ? `Score: ${score.toFixed(4)} // Exceeds Threshold θ_dev (${theta.toFixed(2)})`
+          : `Score: ${score.toFixed(4)} // Safe Biological Range (< θ_dev)`;
+        gaugeStatus.className = isFake ? 'text-rose-300 font-medium' : 'text-emerald-300 font-medium';
+      }
+
+      // Update Metric Cards
+      const verdictTag = document.getElementById('spec-verdict-tag');
+      const verdictSub = document.getElementById('spec-verdict-sub');
+      const probScore = document.getElementById('spec-prob-score');
+      const probPct = document.getElementById('spec-prob-pct');
+      const thresholdVal = document.getElementById('spec-threshold-val');
+      const aggTag = document.getElementById('spec-aggregation-tag');
+      const specLatency = document.getElementById('spec-latency');
+      const specConfidence = document.getElementById('spec-confidence');
+
+      if (verdictTag) {
+        verdictTag.innerText = isFake ? 'DEEPFAKE' : 'REAL';
+        verdictTag.className = isFake ? 'text-rose-400 font-bold text-sm mt-1' : 'text-emerald-400 font-bold text-sm mt-1';
+      }
+      if (verdictSub) {
+        verdictSub.innerText = isFake ? 'Spoof detected (≥ θ)' : 'Authentic speech (< θ)';
+      }
+      if (probScore) probScore.innerText = score.toFixed(4);
+      if (probPct) probPct.innerText = `${(score * 100).toFixed(1)}% spoof prob`;
+      if (thresholdVal) thresholdVal.innerText = `θ = ${theta.toFixed(2)}`;
+      if (aggTag) aggTag.innerText = `${agg} chunk agg`;
+      if (specLatency) specLatency.innerText = `${latency}ms`;
+      if (specConfidence) specConfidence.innerText = `${(isFake ? score : (1 - score)) * 100).toFixed(1)}%`;
+
+      // Update Filename & Frames
+      const fileEl = document.getElementById('analyzed-filename');
+      const chunksEl = document.getElementById('analyzed-chunks-info');
+      if (fileEl) fileEl.innerText = `Target: ${filename}`;
+      if (chunksEl) chunksEl.innerText = `13 MFCC Bands // ${chunks} Frames // ${agg}`;
+
+      // Update Description
+      const desc = document.getElementById('analysis-desc');
+      if (desc && data.details) desc.innerText = data.details;
+    }
+
     // Trigger fake / deepfake result view with live metrics
     function showFake(data = {}) {
       currentVerdict = 'deepfake';
+      lastAnalysisData = data;
       switchToState(2, 'deepfake');
-
-      const conf = data.confidence !== undefined ? data.confidence : 98.7;
-      const latency = data.latency !== undefined ? data.latency : 42;
-      const filename = data.filename || 'Uploaded Stream';
-
-      document.getElementById('spec-confidence').innerText = (typeof conf === 'number' ? conf.toFixed(1) : conf) + '%';
-      document.getElementById('spec-latency').innerText = latency + 'ms';
-      document.getElementById('analyzed-filename').innerText = `Target: ${filename}`;
-      if (data.details) {
-        document.getElementById('analysis-desc').innerText = data.details;
-      }
+      updateResultsUI(data, 'deepfake');
     }
 
     // Trigger authentic / real result view with live metrics
     function showReal(data = {}) {
       currentVerdict = 'authentic';
+      lastAnalysisData = data;
       switchToState(2, 'authentic');
-
-      const conf = data.confidence !== undefined ? data.confidence : 99.4;
-      const latency = data.latency !== undefined ? data.latency : 39;
-      const filename = data.filename || 'Uploaded Stream';
-
-      document.getElementById('spec-confidence').innerText = (typeof conf === 'number' ? conf.toFixed(1) : conf) + '%';
-      document.getElementById('spec-latency').innerText = latency + 'ms';
-      document.getElementById('analyzed-filename').innerText = `Target: ${filename}`;
-      if (data.details) {
-        document.getElementById('analysis-desc').innerText = data.details;
-      }
+      updateResultsUI(data, 'authentic');
     }
 
     function switchToState(stateNum, verdict) {
@@ -841,8 +961,12 @@
     }
 
     function toggleVerdictType() {
-      currentVerdict = currentVerdict === 'deepfake' ? 'authentic' : 'deepfake';
+      currentVerdict = (currentVerdict === 'deepfake' || currentVerdict === 'fake') ? 'authentic' : 'deepfake';
+      const simData = currentVerdict === 'deepfake'
+        ? { score: 0.987, confidence: 98.7, latency: 42, theta_dev: 0.76, aggregation: 'top20', chunks: 8, filename: 'Simulated Vocoder Stream' }
+        : { score: 0.042, confidence: 99.4, latency: 39, theta_dev: 0.76, aggregation: 'top20', chunks: 8, filename: 'Simulated Natural Stream' };
       applyVerdictStyles(currentVerdict);
+      updateResultsUI(simData, currentVerdict);
     }
 
     function applyVerdictStyles(verdict) {
@@ -854,43 +978,41 @@
       const anomalyWave = document.getElementById('wave-path-anomaly');
       const phaseTag = document.getElementById('phase-tag');
       const desc = document.getElementById('analysis-desc');
-      const conf = document.getElementById('spec-confidence');
-      const latency = document.getElementById('spec-latency');
       const switcherDot = document.getElementById('switcher-dot');
       const switcherText = document.getElementById('switcher-text');
 
       if (verdict === 'deepfake' || verdict === 'fake') {
         // Deepfake styling (muted crimson tone)
-        dot.className = 'w-2 h-2 rounded-full bg-rose-500';
-        badge.className = 'flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-950/40 border border-rose-500/30 text-xs font-mono font-medium text-rose-300 shadow-inner';
-        indicator.className = 'w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse';
-        text.innerText = 'DEEPFAKE DETECTED';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+        if (badge) badge.className = 'flex items-center space-x-2 px-3 py-1 rounded-full bg-rose-950/40 border border-rose-500/30 text-xs font-mono font-medium text-rose-300 shadow-inner';
+        if (indicator) indicator.className = 'w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse';
+        if (text) text.innerText = 'DEEPFAKE DETECTED';
         
-        anomalyBand.style.display = 'block';
-        anomalyWave.style.display = 'block';
-        phaseTag.style.display = 'block';
-        phaseTag.className = 'absolute bottom-2 right-3 font-mono text-[10px] text-rose-400/90 bg-rose-950/60 px-2.5 py-0.5 rounded border border-rose-500/25 backdrop-blur-sm';
-        phaseTag.innerText = 'PHASE INCOHERENCE @ 8.4 kHz';
-
-        desc.innerText = 'Non-biological phase alignment and high-frequency vocoder artifacts detected in 8.4 kHz spectral cluster. Characteristic signature of diffusion-based neural vocoder.';
+        if (anomalyBand) anomalyBand.style.display = 'block';
+        if (anomalyWave) anomalyWave.style.display = 'block';
+        if (phaseTag) {
+          phaseTag.style.display = 'block';
+          phaseTag.className = 'absolute bottom-2 right-3 font-mono text-[10px] text-rose-400/90 bg-rose-950/60 px-2.5 py-0.5 rounded border border-rose-500/25 backdrop-blur-sm';
+          phaseTag.innerText = 'PHASE INCOHERENCE @ 8.4 kHz';
+        }
 
         if (switcherDot) switcherDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-400';
         if (switcherText) switcherText.innerText = 'Simulate Authentic Human';
         applyWideWaveformState('deepfake');
       } else {
         // Authentic styling (muted sage green tone)
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-        badge.className = 'flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-xs font-mono font-medium text-emerald-300 shadow-inner';
-        indicator.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse';
-        text.innerText = 'AUTHENTIC HUMAN';
+        if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+        if (badge) badge.className = 'flex items-center space-x-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-xs font-mono font-medium text-emerald-300 shadow-inner';
+        if (indicator) indicator.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse';
+        if (text) text.innerText = 'AUTHENTIC HUMAN';
         
-        anomalyBand.style.display = 'none';
-        anomalyWave.style.display = 'none';
-        phaseTag.style.display = 'block';
-        phaseTag.className = 'absolute bottom-2 right-3 font-mono text-[10px] text-emerald-400/90 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-500/25 backdrop-blur-sm';
-        phaseTag.innerText = 'ORGANIC GLOTTAL DISPERSION';
-
-        desc.innerText = 'Acoustic vocal tract resonance matches natural biological dispersion. Organic micro-tremors and natural formant transitions verified without synthetic vocoder artifacting.';
+        if (anomalyBand) anomalyBand.style.display = 'none';
+        if (anomalyWave) anomalyWave.style.display = 'none';
+        if (phaseTag) {
+          phaseTag.style.display = 'block';
+          phaseTag.className = 'absolute bottom-2 right-3 font-mono text-[10px] text-emerald-400/90 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-500/25 backdrop-blur-sm';
+          phaseTag.innerText = 'ORGANIC GLOTTAL DISPERSION';
+        }
 
         if (switcherDot) switcherDot.className = 'w-1.5 h-1.5 rounded-full bg-rose-400';
         if (switcherText) switcherText.innerText = 'Simulate Synthetic Vocoder';
@@ -1022,6 +1144,18 @@
 
     // Initialize initial state
     applyWideWaveformState('upload');
+
+    // Server-side rendered result hydration (if submitted via standard POST)
+    {% if result %}
+    window.addEventListener('DOMContentLoaded', () => {
+      const serverResult = {{ result | tojson }};
+      if (serverResult.prediction === 'Real' || serverResult.state === 'real' || serverResult.state === 'authentic') {
+        showReal(serverResult);
+      } else {
+        showFake(serverResult);
+      }
+    });
+    {% endif %}
   </script>
   <!-- END: Interactive Logic -->
 </body>
