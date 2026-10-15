@@ -1,5 +1,7 @@
-flask
-librosa
-scikit-learn
-joblib
-numpy
+flask==3.0.3
+librosa==0.10.2.post1
+scikit-learn==1.6.1
+joblib==1.4.2
+numpy==2.2.3
+torch==2.6.0
+pytest==8.3.4

@@ -1,0 +1,30 @@
+{
+  "project_name": "deepfake-voice-detector",
+  "version": "review3",
+  "seed": 42,
+  "theta_dev": null,
+  "audio": {
+    "sample_rate": 16000,
+    "frame_duration": 0.5,
+    "n_mfcc": 13,
+    "n_fft": 512,
+    "hop_length": 160
+  },
+  "paths": {
+    "data_dir": "data",
+    "splits_dir": "splits",
+    "features_dir": "features",
+    "models_dir": "models",
+    "scores_dir": "scores",
+    "results_dir": "results"
+  },
+  "model": {
+    "architecture": "RandomForest",
+    "n_estimators": 100,
+    "random_state": 42
+  },
+  "evaluation": {
+    "theta_dev": null,
+    "metric": "EER"
+  }
+}
